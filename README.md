@@ -33,13 +33,15 @@
 
 ## Technologies Used
 
-- **Python** — Core application development
-- **Flask** — Web application framework
-- **HTML5** — Web page structure
-- **CSS3** — User interface and styling
-- **JavaScript** — Interactive gameplay and browser functionality
-- **Git and GitHub** — Version control and project management
-- **Render** — Cloud deployment and hosting
+| Technology | Purpose |
+|------------|---------|
+| **Python** | Core application development |
+| **Flask** | Web application framework |
+| **HTML5** | Web page structure |
+| **CSS3** | User interface and styling |
+| **JavaScript** | Interactive gameplay and browser functionality |
+| **Git and GitHub** | Version control and project management |
+| **Render** | Cloud deployment and hosting |
 
 ## Project Structure
 

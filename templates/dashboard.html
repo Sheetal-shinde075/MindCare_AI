@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MindCare AI - Dashboard</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .welcome {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .welcome h2 {
+            font-size: 32px;
+            color: #2c3e50;
+        }
+
+        .welcome p {
+            font-size: 21px;
+            color: #666;
+        }
+
+        .games {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .game {
+            background: white;
+            width: 250px;
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .game-icon {
+            font-size: 55px;
+        }
+
+        .game h3 {
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        .game p {
+            font-size: 18px;
+            color: #666;
+            min-height: 45px;
+        }
+
+        .game button {
+            padding: 14px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .game button:hover {
+            opacity: 0.85;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .language-note {
+            margin-top: 25px;
+            color: #888;
+            font-size: 15px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h1>🧠 MindCare AI</h1>
+
+</div>
+
+
+<div class="container">
+
+
+    <div class="welcome">
+
+        <h2 id="welcomeTitle">
+            Welcome! 👋
+        </h2>
+
+        <p id="welcomeText">
+            Let's exercise your memory and thinking skills today.
+        </p>
+
+    </div>
+
+
+    <h2 id="activityTitle">
+        Choose an Activity 🎮
+    </h2>
+
+
+    <div class="games">
+
+
+        <!-- MEMORY MATCH -->
+
+        <div class="game">
+
+            <div class="game-icon">
+                🃏
+            </div>
+
+            <h3 id="memoryTitle">
+                Memory Match
+            </h3>
+
+            <p id="memoryText">
+                Test your visual memory.
+            </p>
+
+            <a href="/memory">
+
+                <button id="memoryButton">
+                    Play
+                </button>
+
+            </a>
+
+        </div>
+
+
+        <!-- SEQUENCE MEMORY -->
+
+        <div class="game">
+
+            <div class="game-icon">
+                🔢
+            </div>
+
+            <h3 id="sequenceTitle">
+                Sequence Memory
+            </h3>
+
+            <p id="sequenceText">
+                Remember the numbers.
+            </p>
+
+            <a href="/sequence">
+
+                <button id="sequenceButton">
+                    Play
+                </button>
+
+            </a>
+
+        </div>
+
+
+  <!-- PATTERN GAME -->
+
+<div class="game">
+
+    <div class="game-icon">
+        🧩
+    </div>
+
+    <h3 id="patternTitle">
+        Pattern Game
+    </h3>
+
+    <p id="patternText">
+        Find the missing pattern.
+    </p>
+
+    <a href="/pattern">
+        <button id="patternButton">
+            Play
+        </button>
+    </a>
+
+</div>
+
+
+<script>
+
+
+/* ==========================================
+   GET LANGUAGE FROM FLASK
+   ========================================== */
+
+const language = "{{ language }}" || "english";
+
+
+/* ==========================================
+   TRANSLATIONS
+   ========================================== */
+
+const translations = {
+
+    english: {
+
+        welcome: "Welcome! 👋",
+
+        welcomeText:
+        "Let's exercise your memory and thinking skills today.",
+
+        activity:
+        "Choose an Activity 🎮",
+
+        memory:
+        "Memory Match",
+
+        memoryText:
+        "Test your visual memory.",
+
+        sequence:
+        "Sequence Memory",
+
+        sequenceText:
+        "Remember the numbers.",
+
+        pattern:
+        "Pattern Game",
+
+        patternText:
+        "Find the missing pattern.",
+
+        play:
+        "Play",
+
+        note:
+        "Your selected language is being used."
+
+    },
+
+
+    hindi: {
+
+        welcome:
+        "स्वागत है! 👋",
+
+        welcomeText:
+        "आज अपनी याददाश्त और सोचने की क्षमता का अभ्यास करें।",
+
+        activity:
+        "एक गतिविधि चुनें 🎮",
+
+        memory:
+        "याददाश्त मिलान",
+
+        memoryText:
+        "अपनी दृश्य याददाश्त का परीक्षण करें।",
+
+        sequence:
+        "क्रम याददाश्त",
+
+        sequenceText:
+        "संख्याओं को याद रखें।",
+
+        pattern:
+        "पैटर्न गेम",
+
+        patternText:
+        "अधूरे पैटर्न को पूरा करें।",
+
+        play:
+        "खेलें",
+
+        note:
+        "आपकी चुनी हुई भाषा का उपयोग किया जा रहा है।"
+
+    },
+
+
+    marathi: {
+
+        welcome:
+        "स्वागत आहे! 👋",
+
+        welcomeText:
+        "आज तुमच्या स्मरणशक्ती आणि विचार करण्याच्या क्षमतेचा सराव करा.",
+
+        activity:
+        "एक उपक्रम निवडा 🎮",
+
+        memory:
+        "स्मरणशक्ती सामना",
+
+        memoryText:
+        "तुमच्या दृश्य स्मरणशक्तीची चाचणी घ्या.",
+
+        sequence:
+        "क्रम स्मरणशक्ती",
+
+        sequenceText:
+        "संख्या लक्षात ठेवा.",
+
+        pattern:
+        "पॅटर्न गेम",
+
+        patternText:
+        "अपूर्ण पॅटर्न शोधा.",
+
+        play:
+        "खेळा",
+
+        note:
+        "तुमची निवडलेली भाषा वापरली जात आहे."
+
+    },
+
+
+    telugu: {
+
+        welcome:
+        "స్వాగతం! 👋",
+
+        welcomeText:
+        "ఈరోజు మీ జ్ఞాపకశక్తి మరియు ఆలోచనా నైపుణ్యాలను సాధన చేయండి.",
+
+        activity:
+        "ఒక కార్యకలాపాన్ని ఎంచుకోండి 🎮",
+
+        memory:
+        "జ్ఞాపకశక్తి మ్యాచ్",
+
+        memoryText:
+        "మీ దృశ్య జ్ఞాపకశక్తిని పరీక్షించండి.",
+
+        sequence:
+        "క్రమ జ్ఞాపకశక్తి",
+
+        sequenceText:
+        "సంఖ్యలను గుర్తుంచుకోండి.",
+
+        pattern:
+        "ప్యాటర్న్ గేమ్",
+
+        patternText:
+        "అసంపూర్ణ ప్యాటర్న్‌ను కనుగొనండి.",
+
+        play:
+        "ఆడండి",
+
+        note:
+        "మీరు ఎంచుకున్న భాష ఉపయోగించబడుతోంది."
+
+    },
+
+
+    urdu: {
+
+        welcome:
+        "خوش آمدید! 👋",
+
+        welcomeText:
+        "آج اپنی یادداشت اور سوچنے کی صلاحیتوں کی مشق کریں۔",
+
+        activity:
+        "ایک سرگرمی منتخب کریں 🎮",
+
+        memory:
+        "یادداشت میچ",
+
+        memoryText:
+        "اپنی بصری یادداشت کا ٹیسٹ کریں۔",
+
+        sequence:
+        "ترتیب یادداشت",
+
+        sequenceText:
+        "نمبروں کو یاد رکھیں۔",
+
+        pattern:
+        "پیٹرن گیم",
+
+        patternText:
+        "نامکمل پیٹرن تلاش کریں۔",
+
+        play:
+        "کھیلیں",
+
+        note:
+        "آپ کی منتخب کردہ زبان استعمال کی جا رہی ہے۔"
+
+    }
+
+};
+
+
+/* ==========================================
+   SELECT TRANSLATION
+   ========================================== */
+
+const t =
+    translations[language] || translations.english;
+
+
+/* ==========================================
+   APPLY TRANSLATION
+   ========================================== */
+
+document.getElementById("welcomeTitle").innerText =
+    t.welcome;
+
+document.getElementById("welcomeText").innerText =
+    t.welcomeText;
+
+document.getElementById("activityTitle").innerText =
+    t.activity;
+
+document.getElementById("memoryTitle").innerText =
+    t.memory;
+
+document.getElementById("memoryText").innerText =
+    t.memoryText;
+
+document.getElementById("sequenceTitle").innerText =
+    t.sequence;
+
+document.getElementById("sequenceText").innerText =
+    t.sequenceText;
+
+document.getElementById("patternTitle").innerText =
+    t.pattern;
+
+document.getElementById("patternText").innerText =
+    t.patternText;
+
+document.getElementById("memoryButton").innerText =
+    t.play;
+
+document.getElementById("sequenceButton").innerText =
+    t.play;
+
+document.getElementById("patternButton").innerText =
+    t.play;
+
+document.getElementById("languageNote").innerText =
+    t.note;
+
+
+/* ==========================================
+   URDU RIGHT-TO-LEFT
+   ========================================== */
+
+if (language === "urdu") {
+
+    document.body.dir = "rtl";
+
+}
+else {
+
+    document.body.dir = "ltr";
+
+}
+
+</script>
+
+
+</body>
+
+</html>

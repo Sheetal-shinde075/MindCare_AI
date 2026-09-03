@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MindCare AI - Sequence Memory</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            color: #2c3e50;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 22px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .game-box {
+            max-width: 850px;
+            margin: 35px auto;
+            padding: 35px;
+            background: white;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.10);
+        }
+
+        .round {
+            font-size: 21px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        h2 {
+            font-size: 34px;
+            margin: 15px 0;
+        }
+
+        .instruction {
+            font-size: 20px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .sequence {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin: 35px 0;
+        }
+
+        .number {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #eef7f3;
+            border: 3px solid #dce9e3;
+            border-radius: 18px;
+            font-size: 38px;
+            font-weight: bold;
+        }
+
+        .answer-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .number-button {
+            width: 75px;
+            height: 65px;
+            font-size: 26px;
+            font-weight: bold;
+            border: 2px solid #dfe6e3;
+            border-radius: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .number-button:hover {
+            background: #eef7f3;
+        }
+
+        .main-button {
+            padding: 16px 35px;
+            font-size: 20px;
+            border: none;
+            border-radius: 14px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .main-button:hover {
+            opacity: 0.85;
+        }
+
+        .timer {
+            font-size: 30px;
+            font-weight: bold;
+            margin: 20px;
+        }
+
+        #answerScreen,
+        #resultScreen {
+            display: none;
+        }
+
+        .score {
+            font-size: 55px;
+            font-weight: bold;
+            margin: 25px;
+        }
+
+        @media(max-width:600px) {
+            .game-box {
+                margin: 15px;
+                padding: 25px 15px;
+            }
+
+            .number {
+                width: 70px;
+                height: 70px;
+                font-size: 30px;
+            }
+
+            .number-button {
+                width: 60px;
+                height: 55px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🧠 MindCare AI</h1>
+</div>
+
+<div class="game-box">
+
+    <div id="memoryScreen">
+
+        <div class="round" id="roundText">
+            Round 1 of 3
+        </div>
+
+        <h2 id="lookTitle">
+            Remember the Number Sequence
+        </h2>
+
+        <p class="instruction" id="lookText">
+            Look carefully at the numbers and remember their order.
+        </p>
+
+        <div class="timer" id="timer">
+            10
+        </div>
+
+        <div class="sequence" id="sequence"></div>
+
+        <button class="main-button"
+                id="rememberButton"
+                onclick="startAnswer()">
+            I Remember
+        </button>
+
+    </div>
+
+
+    <div id="answerScreen">
+
+        <div class="round" id="answerRound">
+            Round 1 of 3
+        </div>
+
+        <h2 id="answerTitle">
+            Enter the sequence
+        </h2>
+
+        <p class="instruction" id="answerText">
+            Click the numbers in the same order you remember.
+        </p>
+
+        <div class="sequence" id="userSequence"></div>
+
+        <div class="answer-buttons" id="numberButtons"></div>
+
+        <button class="main-button"
+                id="clearButton"
+                onclick="clearAnswer()">
+            Clear
+        </button>
+
+        <br><br>
+
+        <button class="main-button"
+                id="submitButton"
+                onclick="checkAnswer()">
+            Done
+        </button>
+
+    </div>
+
+
+    <div id="resultScreen">
+
+        <h2 id="resultTitle">
+            Sequence Exercise Complete
+        </h2>
+
+        <div class="score" id="score">
+            0%
+        </div>
+
+        <p class="instruction" id="resultText"></p>
+
+        <br>
+
+        <button class="main-button"
+                id="againButton"
+                onclick="restartGame()">
+            Try Again
+        </button>
+
+        <br><br>
+
+        <button class="main-button"
+                id="dashboardButton"
+                onclick="goDashboard()">
+            Back to Dashboard
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ==========================================
+   LANGUAGE FIX
+   ========================================== */
+
+const languageMap = {
+    english: "english",
+    hindi: "hindi",
+    marathi: "marathi",
+    telugu: "telugu",
+    urdu: "urdu",
+
+    en: "english",
+    hi: "hindi",
+    mr: "marathi",
+    te: "telugu",
+    ur: "urdu"
+};
+
+const language =
+    languageMap["{{ language }}"] || "english";
+
+
+/* ==========================================
+   TRANSLATIONS
+   ========================================== */
+
+const translations = {
+
+    english: {
+        easy: "Easy",
+        moderate: "Moderate",
+        hard: "A Little Hard",
+
+        lookTitle: "Remember the Number Sequence",
+        lookText: "Look carefully at the numbers and remember their order.",
+        remember: "I Remember",
+
+        answerTitle: "Enter the sequence",
+        answerText: "Click the numbers in the same order you remember.",
+
+        clear: "Clear",
+        done: "Done",
+
+        resultTitle: "Sequence Exercise Complete",
+        again: "Try Again",
+        dashboard: "Back to Dashboard",
+
+        excellent: "Excellent work! You remembered the sequence very well.",
+        good: "Good work! Keep practicing your memory.",
+        keep: "Nice effort! Keep practicing regularly."
+    },
+
+    hindi: {
+        easy: "आसान",
+        moderate: "मध्यम",
+        hard: "थोड़ा कठिन",
+
+        lookTitle: "संख्याओं का क्रम याद रखें",
+        lookText: "संख्याओं को ध्यान से देखें और उनका क्रम याद रखें।",
+        remember: "मुझे याद है",
+
+        answerTitle: "क्रम दर्ज करें",
+        answerText: "जिन संख्याओं को आपने याद रखा है, उन्हें उसी क्रम में चुनें।",
+
+        clear: "साफ करें",
+        done: "पूरा करें",
+
+        resultTitle: "क्रम याददाश्त अभ्यास पूरा हुआ",
+        again: "फिर से खेलें",
+        dashboard: "डैशबोर्ड पर वापस जाएँ",
+
+        excellent: "बहुत बढ़िया! आपने क्रम बहुत अच्छी तरह याद रखा।",
+        good: "अच्छा काम! अपनी याददाश्त का अभ्यास जारी रखें।",
+        keep: "अच्छी कोशिश! नियमित अभ्यास करते रहें।"
+    },
+
+    marathi: {
+        easy: "सोपे",
+        moderate: "मध्यम",
+        hard: "थोडे कठीण",
+
+        lookTitle: "संख्यांचा क्रम लक्षात ठेवा",
+        lookText: "संख्या काळजीपूर्वक पहा आणि त्यांचा क्रम लक्षात ठेवा.",
+        remember: "मला आठवते",
+
+        answerTitle: "क्रम निवडा",
+        answerText: "तुम्हाला आठवलेल्या संख्या त्याच क्रमाने निवडा.",
+
+        clear: "पुसा",
+        done: "पूर्ण",
+
+        resultTitle: "क्रम स्मरणशक्तीचा सराव पूर्ण",
+        again: "पुन्हा प्रयत्न करा",
+        dashboard: "डॅशबोर्डवर परत जा",
+
+        excellent: "उत्कृष्ट! तुम्ही क्रम खूप चांगल्या प्रकारे लक्षात ठेवला.",
+        good: "छान काम! स्मरणशक्तीचा सराव सुरू ठेवा.",
+        keep: "छान प्रयत्न! नियमित सराव करत रहा."
+    },
+
+    telugu: {
+        easy: "సులభం",
+        moderate: "మధ్యస్థం",
+        hard: "కొంచెం కష్టం",
+
+        lookTitle: "సంఖ్యల క్రమాన్ని గుర్తుంచుకోండి",
+        lookText: "సంఖ్యలను జాగ్రత్తగా చూసి వాటి క్రమాన్ని గుర్తుంచుకోండి.",
+        remember: "నాకు గుర్తుంది",
+
+        answerTitle: "క్రమాన్ని నమోదు చేయండి",
+        answerText: "మీకు గుర్తున్న సంఖ్యలను అదే క్రమంలో ఎంచుకోండి.",
+
+        clear: "తొలగించండి",
+        done: "పూర్తి",
+
+        resultTitle: "క్రమ జ్ఞాపకశక్తి వ్యాయామం పూర్తయింది",
+        again: "మళ్లీ ప్రయత్నించండి",
+        dashboard: "డ్యాష్‌బోర్డ్‌కు తిరిగి వెళ్లండి",
+
+        excellent: "అద్భుతం! మీరు క్రమాన్ని చాలా బాగా గుర్తుంచుకున్నారు.",
+        good: "చాలా బాగా చేశారు! మీ జ్ఞాపకశక్తిని సాధన చేయండి.",
+        keep: "మంచి ప్రయత్నం! క్రమం తప్పకుండా సాధన చేయండి."
+    },
+
+    urdu: {
+        easy: "آسان",
+        moderate: "درمیانہ",
+        hard: "تھوڑا مشکل",
+
+        lookTitle: "نمبروں کی ترتیب یاد رکھیں",
+        lookText: "نمبروں کو غور سے دیکھیں اور ان کی ترتیب یاد رکھیں۔",
+        remember: "مجھے یاد ہے",
+
+        answerTitle: "ترتیب درج کریں",
+        answerText: "جو نمبر آپ کو یاد ہیں انہیں اسی ترتیب میں منتخب کریں۔",
+
+        clear: "صاف کریں",
+        done: "مکمل کریں",
+
+        resultTitle: "ترتیب یادداشت کی مشق مکمل ہوئی",
+        again: "دوبارہ کوشش کریں",
+        dashboard: "ڈیش بورڈ پر واپس جائیں",
+
+        excellent: "بہت خوب! آپ نے ترتیب بہت اچھی طرح یاد رکھی۔",
+        good: "اچھا کام! اپنی یادداشت کی مشق جاری رکھیں۔",
+        keep: "اچھی کوشش! باقاعدگی سے مشق کرتے رہیں۔"
+    }
+
+};
+
+
+const t =
+    translations[language] || translations.english;
+
+
+/* ==========================================
+   VARIABLES
+   ========================================== */
+
+let currentRound = 0;
+let sequence = [];
+let userAnswer = [];
+let timer;
+let timerValue;
+
+
+/* ==========================================
+   GENERATE SEQUENCE
+   ========================================== */
+
+function generateSequence(length) {
+
+    let result = [];
+
+    for (let i = 0; i < length; i++) {
+
+        result.push(
+            Math.floor(Math.random() * 10)
+        );
+
+    }
+
+    return result;
+}
+
+
+/* ==========================================
+   START ROUND
+   ========================================== */
+
+function startRound() {
+
+    clearInterval(timer);
+
+    document.getElementById("memoryScreen").style.display =
+        "block";
+
+    document.getElementById("answerScreen").style.display =
+        "none";
+
+    document.getElementById("resultScreen").style.display =
+        "none";
+
+
+    let length;
+
+    if (currentRound === 0) {
+        length = 3;
+    }
+    else if (currentRound === 1) {
+        length = 4;
+    }
+    else {
+        length = 5;
+    }
+
+
+    let difficulty;
+
+    if (currentRound === 0) {
+        difficulty = t.easy;
+    }
+    else if (currentRound === 1) {
+        difficulty = t.moderate;
+    }
+    else {
+        difficulty = t.hard;
+    }
+
+
+    document.getElementById("roundText").innerText =
+        "Round " +
+        (currentRound + 1) +
+        " of 3 • " +
+        difficulty;
+
+
+    document.getElementById("answerRound").innerText =
+        "Round " +
+        (currentRound + 1) +
+        " of 3";
+
+
+    sequence =
+        generateSequence(length);
+
+    userAnswer = [];
+
+
+    let container =
+        document.getElementById("sequence");
+
+    container.innerHTML = "";
+
+
+    sequence.forEach(function(number) {
+
+        let box =
+            document.createElement("div");
+
+        box.className = "number";
+
+        box.innerText = number;
+
+        container.appendChild(box);
+
+    });
+
+
+    timerValue = 10;
+
+    document.getElementById("timer").innerText =
+        timerValue;
+
+
+    timer =
+        setInterval(function() {
+
+            timerValue--;
+
+            document.getElementById("timer").innerText =
+                timerValue;
+
+
+            if (timerValue <= 0) {
+
+                clearInterval(timer);
+
+                startAnswer();
+
+            }
+
+        }, 1000);
+
+}
+
+
+/* ==========================================
+   ANSWER SCREEN
+   ========================================== */
+
+function startAnswer() {
+
+    clearInterval(timer);
+
+    document.getElementById("memoryScreen").style.display =
+        "none";
+
+    document.getElementById("answerScreen").style.display =
+        "block";
+
+
+    document.getElementById("answerRound").innerText =
+        "Round " +
+        (currentRound + 1) +
+        " of 3";
+
+
+    userAnswer = [];
+
+    showUserSequence();
+
+    createNumberButtons();
+
+}
+
+
+/* ==========================================
+   NUMBER BUTTONS
+   ========================================== */
+
+function createNumberButtons() {
+
+    let container =
+        document.getElementById("numberButtons");
+
+    container.innerHTML = "";
+
+
+    for (let i = 0; i <= 9; i++) {
+
+        let button =
+            document.createElement("button");
+
+        button.className = "number-button";
+
+        button.innerText = i;
+
+
+        button.onclick = function() {
+
+            if (userAnswer.length < sequence.length) {
+
+                userAnswer.push(i);
+
+                showUserSequence();
+
+            }
+
+        };
+
+
+        container.appendChild(button);
+
+    }
+
+}
+
+
+/* ==========================================
+   SHOW USER SEQUENCE
+   ========================================== */
+
+function showUserSequence() {
+
+    let container =
+        document.getElementById("userSequence");
+
+    container.innerHTML = "";
+
+
+    userAnswer.forEach(function(number) {
+
+        let box =
+            document.createElement("div");
+
+        box.className = "number";
+
+        box.innerText = number;
+
+        container.appendChild(box);
+
+    });
+
+}
+
+
+/* ==========================================
+   CLEAR
+   ========================================== */
+
+function clearAnswer() {
+
+    userAnswer = [];
+
+    showUserSequence();
+
+}
+
+
+/* ==========================================
+   CHECK ANSWER
+   ========================================== */
+
+function checkAnswer() {
+
+    if (userAnswer.length !== sequence.length) {
+
+        let message = {
+            english: "Please select all the numbers.",
+            hindi: "कृपया सभी संख्याएँ चुनें।",
+            marathi: "कृपया सर्व संख्या निवडा.",
+            telugu: "దయచేసి అన్ని సంఖ్యలను ఎంచుకోండి.",
+            urdu: "براہ کرم تمام نمبرز منتخب کریں۔"
+        };
+
+        alert(message[language]);
+
+        return;
+    }
+
+
+    let correct = true;
+
+
+    for (let i = 0; i < sequence.length; i++) {
+
+        if (userAnswer[i] !== sequence[i]) {
+
+            correct = false;
+
+            break;
+
+        }
+
+    }
+
+
+    if (correct) {
+
+        window.sequenceCorrect =
+            (window.sequenceCorrect || 0) + 1;
+
+    }
+
+
+    currentRound++;
+
+
+    if (currentRound < 3) {
+
+        startRound();
+
+    }
+    else {
+
+        showResult();
+
+    }
+
+}
+
+
+/* ==========================================
+   RESULT
+   ========================================== */
+
+function showResult() {
+
+    document.getElementById("answerScreen").style.display =
+        "none";
+
+    document.getElementById("resultScreen").style.display =
+        "block";
+
+
+    let correct =
+        window.sequenceCorrect || 0;
+
+
+    let percentage =
+        Math.round(
+            (correct / 3) * 100
+        );
+
+
+    document.getElementById("score").innerText =
+        percentage + "%";
+
+
+    if (percentage >= 85) {
+
+        document.getElementById("resultText").innerText =
+            t.excellent;
+
+    }
+    else if (percentage >= 60) {
+
+        document.getElementById("resultText").innerText =
+            t.good;
+
+    }
+    else {
+
+        document.getElementById("resultText").innerText =
+            t.keep;
+
+    }
+
+}
+
+
+/* ==========================================
+   RESTART
+   ========================================== */
+
+function restartGame() {
+
+    currentRound = 0;
+
+    window.sequenceCorrect = 0;
+
+    sequence = [];
+
+    userAnswer = [];
+
+    startRound();
+
+}
+
+
+/* ==========================================
+   DASHBOARD
+   ========================================== */
+
+function goDashboard() {
+
+    window.location.href =
+        "/dashboard";
+
+}
+
+
+/* ==========================================
+   APPLY LANGUAGE
+   ========================================== */
+
+document.getElementById("lookTitle").innerText =
+    t.lookTitle;
+
+document.getElementById("lookText").innerText =
+    t.lookText;
+
+document.getElementById("rememberButton").innerText =
+    t.remember;
+
+document.getElementById("answerTitle").innerText =
+    t.answerTitle;
+
+document.getElementById("answerText").innerText =
+    t.answerText;
+
+document.getElementById("clearButton").innerText =
+    t.clear;
+
+document.getElementById("submitButton").innerText =
+    t.done;
+
+document.getElementById("resultTitle").innerText =
+    t.resultTitle;
+
+document.getElementById("againButton").innerText =
+    t.again;
+
+document.getElementById("dashboardButton").innerText =
+    t.dashboard;
+
+
+/* ==========================================
+   URDU RIGHT-TO-LEFT
+   ========================================== */
+
+if (language === "urdu") {
+    document.body.dir = "rtl";
+}
+else {
+    document.body.dir = "ltr";
+}
+
+
+/* ==========================================
+   START GAME
+   ========================================== */
+
+window.sequenceCorrect = 0;
+
+startRound();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MindCare AI - Pattern Game</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            color: #2c3e50;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 22px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .game-box {
+            max-width: 1050px;
+            margin: 35px auto;
+            padding: 35px;
+            background: white;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.10);
+        }
+
+        .round {
+            font-size: 21px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 34px;
+            margin: 12px 0;
+        }
+
+        .instruction {
+            font-size: 20px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .timer {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 20px;
+        }
+
+        .pattern-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+            min-height: 190px;
+        }
+
+        .pattern-image {
+            width: 145px;
+            height: 145px;
+            object-fit: contain;
+            background: #fafafa;
+            border-radius: 18px;
+            border: 3px solid #e1e8e5;
+            padding: 8px;
+        }
+
+        .question-mark {
+            width: 145px;
+            height: 145px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f5f3;
+            border: 3px dashed #4CAF50;
+            border-radius: 18px;
+            font-size: 65px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .choices {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .choice-box {
+            width: 200px;
+            height: 190px;
+            background: #fafafa;
+            border: 4px solid #e1e8e5;
+            border-radius: 20px;
+            padding: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .choice-box:hover {
+            transform: scale(1.04);
+            border-color: #4CAF50;
+        }
+
+        .choice-box.selected {
+            border: 6px solid #4CAF50;
+            background: #eef8f1;
+        }
+
+        .choice-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .main-button {
+            padding: 16px 35px;
+            font-size: 20px;
+            border: none;
+            border-radius: 14px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .main-button:hover {
+            opacity: 0.85;
+        }
+
+        #answerScreen,
+        #resultScreen {
+            display: none;
+        }
+
+        .score {
+            font-size: 55px;
+            font-weight: bold;
+            margin: 25px;
+        }
+
+        .feedback {
+            font-size: 21px;
+            margin: 20px;
+            color: #555;
+        }
+
+        @media(max-width:700px) {
+
+            .game-box {
+                margin: 15px;
+                padding: 25px 15px;
+            }
+
+            .pattern-image,
+            .question-mark {
+                width: 105px;
+                height: 105px;
+            }
+
+            .question-mark {
+                font-size: 45px;
+            }
+
+            .choice-box {
+                width: 145px;
+                height: 140px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h1>🧠 MindCare AI</h1>
+
+</div>
+
+
+<div class="game-box">
+
+
+    <!-- ============================= -->
+    <!-- PATTERN SCREEN -->
+    <!-- ============================= -->
+
+    <div id="patternScreen">
+
+        <div class="round" id="roundText">
+            Round 1 of 3 • Easy
+        </div>
+
+        <h2 id="patternTitle">
+            Find the Pattern
+        </h2>
+
+        <p class="instruction" id="patternInstruction">
+            Look carefully at the pictures and remember the pattern.
+        </p>
+
+        <div class="timer" id="timer">
+            10
+        </div>
+
+        <div class="pattern-area" id="patternArea"></div>
+
+        <button class="main-button"
+                id="readyButton"
+                onclick="showChoices()">
+            I Understand
+        </button>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- ANSWER SCREEN -->
+    <!-- ============================= -->
+
+    <div id="answerScreen">
+
+        <div class="round" id="answerRound">
+            Round 1 of 3
+        </div>
+
+        <h2 id="answerTitle">
+            What comes next?
+        </h2>
+
+        <p class="instruction" id="answerInstruction">
+            Choose the picture that completes the pattern.
+        </p>
+
+        <div class="choices" id="choices"></div>
+
+        <button class="main-button"
+                id="submitButton"
+                onclick="checkAnswer()">
+            Done
+        </button>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- RESULT SCREEN -->
+    <!-- ============================= -->
+
+    <div id="resultScreen">
+
+        <h2 id="resultTitle">
+            Pattern Game Complete
+        </h2>
+
+        <div class="score" id="score">
+            0%
+        </div>
+
+        <p class="feedback" id="resultText"></p>
+
+        <br>
+
+        <button class="main-button"
+                id="againButton"
+                onclick="restartGame()">
+            Try Again
+        </button>
+
+        <br><br>
+
+        <button class="main-button"
+                id="dashboardButton"
+                onclick="goDashboard()">
+            Back to Dashboard
+        </button>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+/* ==========================================
+   IMAGE POOL
+   ========================================== */
+
+const imagePool = [
+
+    "Bicycle.png",
+    "Bird.png",
+    "Book.png",
+    "Camera.png",
+    "Candle.png",
+    "Car.png",
+    "Cat.png",
+    "Chair.png",
+    "Coffee.png",
+    "Doctor.png",
+    "Dog.png",
+    "Fish.png",
+    "Flower Vase.png",
+    "Food.png",
+    "Fruit.png",
+    "Glasses.png",
+    "Handbag.png",
+    "Keys.png",
+    "Laptop.png",
+    "Music.png",
+    "Shoes.png",
+    "Sky (1).png",
+    "Smartphone.png",
+    "Sunglasses.png",
+    "Table Lamp.png",
+    "Table.png",
+    "Tooth Brush.png",
+    "Umbrella.png",
+    "Wallet.png",
+    "Watch.png"
+
+];
+
+
+/* ==========================================
+   TRANSLATIONS
+   ========================================== */
+
+const translations = {
+
+
+    en: {
+
+        round: "Round",
+        of: "of",
+
+        easy: "Easy",
+        moderate: "Moderate",
+        hard: "A Little Hard",
+
+        patternTitle:
+        "Find the Pattern",
+
+        patternInstruction:
+        "Look carefully at the pictures and remember the pattern.",
+
+        ready:
+        "I Understand",
+
+        answerTitle:
+        "What comes next?",
+
+        answerInstruction:
+        "Choose the picture that completes the pattern.",
+
+        done:
+        "Done",
+
+        resultTitle:
+        "Pattern Game Complete",
+
+        again:
+        "Try Again",
+
+        dashboard:
+        "Back to Dashboard",
+
+        excellent:
+        "Excellent! You found the patterns very well.",
+
+        good:
+        "Good work! Keep practicing your thinking skills.",
+
+        keep:
+        "Nice effort! Keep practicing regularly."
+
+    },
+
+
+    hi: {
+
+        round: "राउंड",
+        of: "में से",
+
+        easy: "आसान",
+        moderate: "मध्यम",
+        hard: "थोड़ा कठिन",
+
+        patternTitle:
+        "पैटर्न खोजें",
+
+        patternInstruction:
+        "तस्वीरों को ध्यान से देखें और पैटर्न को याद रखें।",
+
+        ready:
+        "मैं समझ गया/गई",
+
+        answerTitle:
+        "इसके बाद क्या आएगा?",
+
+        answerInstruction:
+        "पैटर्न को पूरा करने वाली तस्वीर चुनें।",
+
+        done:
+        "पूरा करें",
+
+        resultTitle:
+        "पैटर्न गेम पूरा हुआ",
+
+        again:
+        "फिर से खेलें",
+
+        dashboard:
+        "डैशबोर्ड पर वापस जाएँ",
+
+        excellent:
+        "बहुत बढ़िया! आपने पैटर्न बहुत अच्छे से पहचाने।",
+
+        good:
+        "अच्छा काम! अपनी सोचने की क्षमता का अभ्यास जारी रखें।",
+
+        keep:
+        "अच्छी कोशिश! नियमित अभ्यास करते रहें।"
+
+    },
+
+
+    mr: {
+
+        round: "राउंड",
+        of: "पैकी",
+
+        easy: "सोपे",
+        moderate: "मध्यम",
+        hard: "थोडे कठीण",
+
+        patternTitle:
+        "पॅटर्न शोधा",
+
+        patternInstruction:
+        "चित्रे काळजीपूर्वक पहा आणि पॅटर्न लक्षात ठेवा.",
+
+        ready:
+        "मला समजले",
+
+        answerTitle:
+        "पुढे काय येईल?",
+
+        answerInstruction:
+        "पॅटर्न पूर्ण करणारे चित्र निवडा.",
+
+        done:
+        "पूर्ण",
+
+        resultTitle:
+        "पॅटर्न गेम पूर्ण",
+
+        again:
+        "पुन्हा खेळा",
+
+        dashboard:
+        "डॅशबोर्डवर परत जा",
+
+        excellent:
+        "उत्कृष्ट! तुम्ही पॅटर्न खूप चांगल्या प्रकारे ओळखले.",
+
+        good:
+        "छान काम! तुमच्या विचार करण्याच्या कौशल्याचा सराव सुरू ठेवा.",
+
+        keep:
+        "छान प्रयत्न! नियमित सराव करत रहा."
+
+    },
+
+
+    te: {
+
+        round: "రౌండ్",
+        of: "లో",
+
+        easy: "సులభం",
+        moderate: "మధ్యస్థం",
+        hard: "కొంచెం కష్టం",
+
+        patternTitle:
+        "ప్యాటర్న్‌ను కనుగొనండి",
+
+        patternInstruction:
+        "చిత్రాలను జాగ్రత్తగా చూసి ప్యాటర్న్‌ను గుర్తుంచుకోండి.",
+
+        ready:
+        "నాకు అర్థమైంది",
+
+        answerTitle:
+        "తర్వాత ఏమి వస్తుంది?",
+
+        answerInstruction:
+        "ప్యాటర్న్‌ను పూర్తి చేసే చిత్రాన్ని ఎంచుకోండి.",
+
+        done:
+        "పూర్తి",
+
+        resultTitle:
+        "ప్యాటర్న్ గేమ్ పూర్తయింది",
+
+        again:
+        "మళ్లీ ప్రయత్నించండి",
+
+        dashboard:
+        "డ్యాష్‌బోర్డ్‌కు తిరిగి వెళ్లండి",
+
+        excellent:
+        "అద్భుతం! మీరు ప్యాటర్న్‌లను చాలా బాగా గుర్తించారు.",
+
+        good:
+        "చాలా బాగా చేశారు! మీ ఆలోచనా నైపుణ్యాలను సాధన చేయండి.",
+
+        keep:
+        "మంచి ప్రయత్నం! క్రమం తప్పకుండా సాధన చేయండి."
+
+    },
+
+
+    ur: {
+
+        round: "راؤنڈ",
+        of: "میں سے",
+
+        easy: "آسان",
+        moderate: "درمیانہ",
+        hard: "تھوڑا مشکل",
+
+        patternTitle:
+        "پیٹرن تلاش کریں",
+
+        patternInstruction:
+        "تصاویر کو غور سے دیکھیں اور پیٹرن یاد رکھیں۔",
+
+        ready:
+        "مجھے سمجھ آگئی",
+
+        answerTitle:
+        "اس کے بعد کیا آئے گا؟",
+
+        answerInstruction:
+        "پیٹرن مکمل کرنے والی تصویر منتخب کریں۔",
+
+        done:
+        "مکمل کریں",
+
+        resultTitle:
+        "پیٹرن گیم مکمل ہوئی",
+
+        again:
+        "دوبارہ کھیلیں",
+
+        dashboard:
+        "ڈیش بورڈ پر واپس جائیں",
+
+        excellent:
+        "بہت خوب! آپ نے پیٹرن بہت اچھی طرح پہچانے۔",
+
+        good:
+        "اچھا کام! اپنی سوچنے کی صلاحیتوں کی مشق جاری رکھیں۔",
+
+        keep:
+        "اچھی کوشش! باقاعدگی سے مشق کرتے رہیں۔"
+
+    }
+
+};
+
+
+/* ==========================================
+   LANGUAGE FIX
+   ========================================== */
+
+/*
+   Your language selector stores:
+
+   english
+   hindi
+   marathi
+   telugu
+   urdu
+
+   But this page uses:
+
+   en
+   hi
+   mr
+   te
+   ur
+
+   So we convert them here.
+*/
+
+let savedLanguage =
+    localStorage.getItem("mindcareLanguage") || "english";
+
+
+let languageMap = {
+
+    english: "en",
+
+    hindi: "hi",
+
+    marathi: "mr",
+
+    telugu: "te",
+
+    urdu: "ur"
+
+};
+
+
+let language =
+    languageMap[savedLanguage] || "en";
+
+
+/* ==========================================
+   GAME VARIABLES
+   ========================================== */
+
+let currentRound = 0;
+
+let score = 0;
+
+let currentPattern = [];
+
+let correctAnswer = "";
+
+let selectedAnswer = "";
+
+let timer;
+
+let timerValue = 10;
+
+
+/* ==========================================
+   SHUFFLE
+   ========================================== */
+
+function shuffle(array) {
+
+    let copy = [...array];
+
+    for (let i = copy.length - 1; i > 0; i--) {
+
+        let j =
+            Math.floor(Math.random() * (i + 1));
+
+        [copy[i], copy[j]] =
+        [copy[j], copy[i]];
+
+    }
+
+    return copy;
+
+}
+
+
+/* ==========================================
+   IMAGE PATH
+   ========================================== */
+
+function imagePath(name) {
+
+    return "/static/images/" +
+        encodeURIComponent(name);
+
+}
+
+
+/* ==========================================
+   LANGUAGE
+   ========================================== */
+
+function applyLanguage() {
+
+    let t =
+        translations[language] ||
+        translations.en;
+
+
+    document.getElementById("patternTitle").innerText =
+        t.patternTitle;
+
+
+    document.getElementById("patternInstruction").innerText =
+        t.patternInstruction;
+
+
+    document.getElementById("readyButton").innerText =
+        t.ready;
+
+
+    document.getElementById("answerTitle").innerText =
+        t.answerTitle;
+
+
+    document.getElementById("answerInstruction").innerText =
+        t.answerInstruction;
+
+
+    document.getElementById("submitButton").innerText =
+        t.done;
+
+
+    document.getElementById("resultTitle").innerText =
+        t.resultTitle;
+
+
+    document.getElementById("againButton").innerText =
+        t.again;
+
+
+    document.getElementById("dashboardButton").innerText =
+        t.dashboard;
+
+}
+
+
+/* ==========================================
+   ROUND TEXT
+   ========================================== */
+
+function getRoundText() {
+
+    let t =
+        translations[language] ||
+        translations.en;
+
+
+    let difficultyText;
+
+
+    if (currentRound === 0) {
+
+        difficultyText = t.easy;
+
+    }
+
+    else if (currentRound === 1) {
+
+        difficultyText = t.moderate;
+
+    }
+
+    else {
+
+        difficultyText = t.hard;
+
+    }
+
+
+    return t.round +
+        " " +
+        (currentRound + 1) +
+        " " +
+        t.of +
+        " 3 • " +
+        difficultyText;
+
+}
+
+
+/* ==========================================
+   START ROUND
+   ========================================== */
+
+function startRound() {
+
+    clearInterval(timer);
+
+
+    document.getElementById("patternScreen").style.display =
+        "block";
+
+
+    document.getElementById("answerScreen").style.display =
+        "none";
+
+
+    document.getElementById("resultScreen").style.display =
+        "none";
+
+
+    let patternLength;
+
+    let repeatLength;
+
+
+    /*
+       ROUND 1
+       EASY
+       A B A B
+    */
+
+    if (currentRound === 0) {
+
+        patternLength = 4;
+
+        repeatLength = 2;
+
+    }
+
+
+    /*
+       ROUND 2
+       MODERATE
+       A B C A B C
+    */
+
+    else if (currentRound === 1) {
+
+        patternLength = 6;
+
+        repeatLength = 3;
+
+    }
+
+
+    /*
+       ROUND 3
+       HARD
+       A B C D A B C D
+    */
+
+    else {
+
+        patternLength = 8;
+
+        repeatLength = 4;
+
+    }
+
+
+    document.getElementById("roundText").innerText =
+        getRoundText();
+
+
+    /*
+       Pick unique pictures.
+    */
+
+    let basePictures =
+        shuffle(imagePool).slice(0, repeatLength);
+
+
+    currentPattern = [];
+
+
+    /*
+       Build repeating pattern.
+    */
+
+    for (let i = 0; i < patternLength; i++) {
+
+        currentPattern.push(
+            basePictures[i % repeatLength]
+        );
+
+    }
+
+
+    /*
+       Correct answer = next picture.
+    */
+
+    correctAnswer =
+        basePictures[
+            patternLength % repeatLength
+        ];
+
+
+    /*
+       Display pattern.
+    */
+
+    let patternArea =
+        document.getElementById("patternArea");
+
+
+    patternArea.innerHTML = "";
+
+
+    currentPattern.forEach(function(name) {
+
+        let img =
+            document.createElement("img");
+
+
+        img.className =
+            "pattern-image";
+
+
+        img.src =
+            imagePath(name);
+
+
+        img.alt =
+            "Pattern picture";
+
+
+        patternArea.appendChild(img);
+
+    });
+
+
+    /*
+       Question mark.
+    */
+
+    let question =
+        document.createElement("div");
+
+
+    question.className =
+        "question-mark";
+
+
+    question.innerText =
+        "?";
+
+
+    patternArea.appendChild(question);
+
+
+    /*
+       Timer.
+    */
+
+    timerValue = 10;
+
+
+    document.getElementById("timer").innerText =
+        "10";
+
+
+    timer =
+        setInterval(function() {
+
+            timerValue--;
+
+
+            document.getElementById("timer").innerText =
+                timerValue;
+
+
+            if (timerValue <= 0) {
+
+                clearInterval(timer);
+
+                showChoices();
+
+            }
+
+        }, 1000);
+
+}
+
+
+/* ==========================================
+   SHOW ANSWER CHOICES
+   ========================================== */
+
+function showChoices() {
+
+    clearInterval(timer);
+
+
+    document.getElementById("patternScreen").style.display =
+        "none";
+
+
+    document.getElementById("answerScreen").style.display =
+        "block";
+
+
+    let t =
+        translations[language] ||
+        translations.en;
+
+
+    document.getElementById("answerRound").innerText =
+
+        t.round +
+        " " +
+        (currentRound + 1) +
+        " " +
+        t.of +
+        " 3";
+
+
+    let wrongAnswers =
+        shuffle(
+            imagePool.filter(function(name) {
+
+                return name !== correctAnswer;
+
+            })
+        ).slice(0, 2);
+
+
+    let choices =
+        shuffle(
+            [correctAnswer, ...wrongAnswers]
+        );
+
+
+    let container =
+        document.getElementById("choices");
+
+
+    container.innerHTML = "";
+
+
+    selectedAnswer = "";
+
+
+    choices.forEach(function(name) {
+
+        let box =
+            document.createElement("div");
+
+
+        box.className =
+            "choice-box";
+
+
+        let img =
+            document.createElement("img");
+
+
+        img.src =
+            imagePath(name);
+
+
+        img.alt =
+            "Answer choice";
+
+
+        box.appendChild(img);
+
+
+        box.onclick =
+            function() {
+
+                document
+                    .querySelectorAll(".choice-box")
+                    .forEach(function(item) {
+
+                        item.classList.remove(
+                            "selected"
+                        );
+
+                    });
+
+
+                box.classList.add(
+                    "selected"
+                );
+
+
+                selectedAnswer =
+                    name;
+
+            };
+
+
+        container.appendChild(box);
+
+    });
+
+}
+
+
+/* ==========================================
+   CHECK ANSWER
+   ========================================== */
+
+function checkAnswer() {
+
+    if (selectedAnswer === "") {
+
+        return;
+
+    }
+
+
+    if (selectedAnswer === correctAnswer) {
+
+        score++;
+
+    }
+
+
+    currentRound++;
+
+
+    if (currentRound < 3) {
+
+        startRound();
+
+    }
+
+    else {
+
+        showResult();
+
+    }
+
+}
+
+
+/* ==========================================
+   RESULT
+   ========================================== */
+
+function showResult() {
+
+    document.getElementById("patternScreen").style.display =
+        "none";
+
+
+    document.getElementById("answerScreen").style.display =
+        "none";
+
+
+    document.getElementById("resultScreen").style.display =
+        "block";
+
+
+    let percentage =
+        Math.round(
+            (score / 3) * 100
+        );
+
+
+    document.getElementById("score").innerText =
+        percentage + "%";
+
+
+    let t =
+        translations[language] ||
+        translations.en;
+
+
+    if (percentage >= 85) {
+
+        document.getElementById("resultText").innerText =
+            t.excellent;
+
+    }
+
+    else if (percentage >= 60) {
+
+        document.getElementById("resultText").innerText =
+            t.good;
+
+    }
+
+    else {
+
+        document.getElementById("resultText").innerText =
+            t.keep;
+
+    }
+
+}
+
+
+/* ==========================================
+   RESTART
+   ========================================== */
+
+function restartGame() {
+
+    currentRound = 0;
+
+    score = 0;
+
+    currentPattern = [];
+
+    correctAnswer = "";
+
+    selectedAnswer = "";
+
+
+    startRound();
+
+}
+
+
+/* ==========================================
+   DASHBOARD
+   ========================================== */
+
+function goDashboard() {
+
+    window.location.href =
+        "/dashboard";
+
+}
+
+
+/* ==========================================
+   START GAME
+   ========================================== */
+
+applyLanguage();
+
+startRound();
+
+
+</script>
+
+
+</body>
+
+</html>

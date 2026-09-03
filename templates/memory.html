@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MindCare AI - Memory Exercise</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            color: #2c3e50;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 22px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .game-box {
+            max-width: 1000px;
+            margin: 35px auto;
+            padding: 35px;
+            background: white;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.10);
+        }
+
+        .round {
+            font-size: 21px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 34px;
+            margin: 12px 0;
+        }
+
+        .instruction {
+            font-size: 20px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .timer {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 20px;
+        }
+
+        .pictures {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .picture {
+            width: 190px;
+            height: 170px;
+            object-fit: contain;
+            background: #fafafa;
+            border-radius: 18px;
+            border: 3px solid #e1e8e5;
+            padding: 8px;
+        }
+
+        .choice {
+            width: 180px;
+            height: 160px;
+            object-fit: contain;
+            background: #fafafa;
+            border-radius: 18px;
+            border: 4px solid #e1e8e5;
+            padding: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .choice:hover {
+            transform: scale(1.03);
+        }
+
+        .choice.selected {
+            border: 5px solid #4CAF50;
+            background: #eef8f1;
+        }
+
+        .main-button {
+            padding: 16px 35px;
+            font-size: 20px;
+            border: none;
+            border-radius: 14px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .main-button:hover {
+            opacity: 0.85;
+        }
+
+        #recallScreen,
+        #resultScreen {
+            display: none;
+        }
+
+        .score {
+            font-size: 55px;
+            font-weight: bold;
+            margin: 25px;
+        }
+
+        @media(max-width:700px) {
+
+            .game-box {
+                margin: 15px;
+                padding: 25px 15px;
+            }
+
+            .picture,
+            .choice {
+                width: 140px;
+                height: 130px;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+<div class="header">
+    <h1>🧠 MindCare AI</h1>
+</div>
+
+
+<div class="game-box">
+
+
+    <!-- MEMORY SCREEN -->
+
+    <div id="memoryScreen">
+
+        <div class="round" id="roundText">
+            Round 1 of 3
+        </div>
+
+        <h2 id="lookTitle">
+            Look and Remember
+        </h2>
+
+        <p class="instruction" id="lookText">
+            Look carefully at these pictures and try to remember them.
+        </p>
+
+        <div class="timer" id="timer">
+            10
+        </div>
+
+        <div class="pictures" id="memoryPictures"></div>
+
+        <button class="main-button"
+                id="rememberButton"
+                onclick="startRecall()">
+            I Remember
+        </button>
+
+    </div>
+
+
+    <!-- RECALL SCREEN -->
+
+    <div id="recallScreen">
+
+        <div class="round" id="recallRound">
+            Round 1 of 3
+        </div>
+
+        <h2 id="recallTitle">
+            Which pictures did you see?
+        </h2>
+
+        <p class="instruction" id="recallText">
+            Select all the pictures you remember seeing.
+        </p>
+
+        <div class="pictures" id="choices"></div>
+
+        <button class="main-button"
+                id="submitButton"
+                onclick="checkAnswers()">
+            Done
+        </button>
+
+    </div>
+
+
+    <!-- RESULT SCREEN -->
+
+    <div id="resultScreen">
+
+        <h2 id="resultTitle">
+            Memory Exercise Complete
+        </h2>
+
+        <div class="score" id="score">
+            0%
+        </div>
+
+        <p class="instruction" id="resultText"></p>
+
+        <br>
+
+        <button class="main-button"
+                onclick="restartGame()"
+                id="againButton">
+            Try Again
+        </button>
+
+        <br><br>
+
+        <button class="main-button"
+                onclick="goDashboard()"
+                id="dashboardButton">
+            Back to Dashboard
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* ==========================================
+   YOUR 30 IMAGES
+   ========================================== */
+
+const imagePool = [
+
+    "Bicycle.png",
+    "Bird.png",
+    "Book.png",
+    "Camera.png",
+    "Candle.png",
+    "Car.png",
+    "Cat.png",
+    "Chair.png",
+    "Coffee.png",
+    "Doctor.png",
+    "Dog.png",
+    "Fish.png",
+    "Flower Vase.png",
+    "Food.png",
+    "Fruit.png",
+    "Glasses.png",
+    "Handbag.png",
+    "Keys.png",
+    "Laptop.png",
+    "Music.png",
+    "Shoes.png",
+    "Sky (1).png",
+    "Smartphone.png",
+    "Sunglasses.png",
+    "Table Lamp.png",
+    "Table.png",
+    "Tooth Brush.png",
+    "Umbrella.png",
+    "Wallet.png",
+    "Watch.png"
+
+];
+
+
+/* ==========================================
+   LANGUAGES
+   ========================================== */
+
+const translations = {
+
+    en: {
+        easy: "Easy",
+        moderate: "Moderate",
+        hard: "A Little Hard",
+        lookTitle: "Look and Remember",
+        lookText: "Look carefully at these pictures and try to remember them.",
+        remember: "I Remember",
+        recallTitle: "Which pictures did you see?",
+        recallText: "Select all the pictures you remember seeing.",
+        done: "Done",
+        resultTitle: "Memory Exercise Complete",
+        again: "Try Again",
+        dashboard: "Back to Dashboard",
+        excellent: "Excellent work! You remembered most of the pictures.",
+        good: "Good work! Keep practicing your memory.",
+        keep: "Nice effort! Keep practicing regularly."
+    },
+
+    hi: {
+        easy: "आसान",
+        moderate: "मध्यम",
+        hard: "थोड़ा कठिन",
+        lookTitle: "देखें और याद रखें",
+        lookText: "इन तस्वीरों को ध्यान से देखें और याद रखने की कोशिश करें।",
+        remember: "मुझे याद है",
+        recallTitle: "आपने कौन सी तस्वीरें देखीं?",
+        recallText: "जो तस्वीरें आपने देखी थीं, उन्हें चुनें।",
+        done: "पूरा करें",
+        resultTitle: "याददाश्त अभ्यास पूरा हुआ",
+        again: "फिर से खेलें",
+        dashboard: "डैशबोर्ड पर वापस जाएँ",
+        excellent: "बहुत बढ़िया! आपने अधिकतर तस्वीरें याद रखीं।",
+        good: "अच्छा काम! अपनी याददाश्त का अभ्यास जारी रखें।",
+        keep: "अच्छी कोशिश! नियमित अभ्यास करते रहें।"
+    },
+
+    mr: {
+        easy: "सोपे",
+        moderate: "मध्यम",
+        hard: "थोडे कठीण",
+        lookTitle: "पहा आणि लक्षात ठेवा",
+        lookText: "ही चित्रे काळजीपूर्वक पहा आणि लक्षात ठेवण्याचा प्रयत्न करा.",
+        remember: "मला आठवते",
+        recallTitle: "तुम्ही कोणती चित्रे पाहिली?",
+        recallText: "तुम्ही पाहिलेली सर्व चित्रे निवडा.",
+        done: "पूर्ण",
+        resultTitle: "स्मरणशक्तीचा सराव पूर्ण",
+        again: "पुन्हा प्रयत्न करा",
+        dashboard: "डॅशबोर्डवर परत जा",
+        excellent: "उत्कृष्ट! तुम्हाला बहुतेक चित्रे लक्षात राहिली.",
+        good: "छान काम! स्मरणशक्तीचा सराव सुरू ठेवा.",
+        keep: "छान प्रयत्न! नियमित सराव करत रहा."
+    },
+
+    te: {
+        easy: "సులభం",
+        moderate: "మధ్యస్థం",
+        hard: "కొంచెం కష్టం",
+        lookTitle: "చూడండి మరియు గుర్తుంచుకోండి",
+        lookText: "ఈ చిత్రాలను జాగ్రత్తగా చూసి గుర్తుంచుకోవడానికి ప్రయత్నించండి.",
+        remember: "నాకు గుర్తుంది",
+        recallTitle: "మీరు ఏ చిత్రాలను చూశారు?",
+        recallText: "మీరు చూసిన అన్ని చిత్రాలను ఎంచుకోండి.",
+        done: "పూర్తి",
+        resultTitle: "జ్ఞాపకశక్తి వ్యాయామం పూర్తయింది",
+        again: "మళ్లీ ప్రయత్నించండి",
+        dashboard: "డ్యాష్‌బోర్డ్‌కు తిరిగి వెళ్లండి",
+        excellent: "అద్భుతం! మీరు చాలా చిత్రాలను గుర్తుంచుకున్నారు.",
+        good: "చాలా బాగా చేశారు! మీ జ్ఞాపకశక్తిని సాధన చేయండి.",
+        keep: "మంచి ప్రయత్నం! క్రమం తప్పకుండా సాధన చేయండి."
+    },
+
+    ur: {
+        easy: "آسان",
+        moderate: "درمیانہ",
+        hard: "تھوڑا مشکل",
+        lookTitle: "دیکھیں اور یاد رکھیں",
+        lookText: "ان تصاویر کو غور سے دیکھیں اور انہیں یاد رکھنے کی کوشش کریں۔",
+        remember: "مجھے یاد ہے",
+        recallTitle: "آپ نے کون سی تصاویر دیکھی تھیں؟",
+        recallText: "وہ تمام تصاویر منتخب کریں جو آپ نے دیکھی تھیں۔",
+        done: "مکمل کریں",
+        resultTitle: "یادداشت کی مشق مکمل ہوئی",
+        again: "دوبارہ کوشش کریں",
+        dashboard: "ڈیش بورڈ پر واپس جائیں",
+        excellent: "بہت خوب! آپ نے زیادہ تر تصاویر یاد رکھیں۔",
+        good: "اچھا کام! اپنی یادداشت کی مشق جاری رکھیں۔",
+        keep: "اچھی کوشش! باقاعدگی سے مشق کرتے رہیں۔"
+    }
+
+};
+
+
+/* ==========================================
+   GAME VARIABLES
+   ========================================== */
+
+/*
+   Flask uses:
+   english, hindi, marathi, telugu, urdu
+
+   The game translations use:
+   en, hi, mr, te, ur
+*/
+
+const flaskLanguage = "{{ language }}";
+
+const languageMap = {
+    english: "en",
+    hindi: "hi",
+    marathi: "mr",
+    telugu: "te",
+    urdu: "ur"
+};
+
+let language =
+    languageMap[flaskLanguage] || flaskLanguage || "en";
+
+
+let currentRound = 0;
+
+let totalCorrect = 0;
+
+let totalQuestions = 0;
+
+let rememberedImages = [];
+
+let selectedImages = [];
+
+let timerValue = 10;
+
+let timer;
+
+
+/* ==========================================
+   RANDOMIZE
+   ========================================== */
+
+function shuffle(array) {
+
+    let copy = [...array];
+
+    for (let i = copy.length - 1; i > 0; i--) {
+
+        let j = Math.floor(Math.random() * (i + 1));
+
+        [copy[i], copy[j]] =
+        [copy[j], copy[i]];
+
+    }
+
+    return copy;
+}
+
+
+/* ==========================================
+   IMAGE PATH
+   ========================================== */
+
+function imagePath(name) {
+
+    return "/static/images/" +
+        encodeURIComponent(name);
+
+}
+
+
+/* ==========================================
+   LANGUAGE
+   ========================================== */
+
+function applyLanguage() {
+
+    let t = translations[language] || translations.en;
+
+    document.getElementById("lookTitle").innerText =
+        t.lookTitle;
+
+    document.getElementById("lookText").innerText =
+        t.lookText;
+
+    document.getElementById("rememberButton").innerText =
+        t.remember;
+
+    document.getElementById("recallTitle").innerText =
+        t.recallTitle;
+
+    document.getElementById("recallText").innerText =
+        t.recallText;
+
+    document.getElementById("submitButton").innerText =
+        t.done;
+
+    document.getElementById("resultTitle").innerText =
+        t.resultTitle;
+
+    document.getElementById("againButton").innerText =
+        t.again;
+
+    document.getElementById("dashboardButton").innerText =
+        t.dashboard;
+
+}
+
+
+/* ==========================================
+   START ROUND
+   ========================================== */
+
+function startRound() {
+
+    clearInterval(timer);
+
+    document.getElementById("memoryScreen").style.display =
+        "block";
+
+    document.getElementById("recallScreen").style.display =
+        "none";
+
+    document.getElementById("resultScreen").style.display =
+        "none";
+
+
+    let difficulty;
+
+
+    /*
+       ROUND 1 = EASY
+       3 pictures
+
+       ROUND 2 = MODERATE
+       4 pictures
+
+       ROUND 3 = HARD
+       5 pictures
+    */
+
+    if (currentRound === 0) {
+
+        difficulty = 3;
+
+    }
+    else if (currentRound === 1) {
+
+        difficulty = 4;
+
+    }
+    else {
+
+        difficulty = 5;
+
+    }
+
+
+    let t = translations[language] || translations.en;
+
+    let difficultyText;
+
+    if (currentRound === 0) {
+
+        difficultyText = t.easy;
+
+    }
+    else if (currentRound === 1) {
+
+        difficultyText = t.moderate;
+
+    }
+    else {
+
+        difficultyText = t.hard;
+
+    }
+
+
+    document.getElementById("roundText").innerText =
+        (currentRound + 1) +
+        " / 3 • " +
+        difficultyText;
+
+
+    rememberedImages =
+        shuffle(imagePool).slice(0, difficulty);
+
+
+    let container =
+        document.getElementById("memoryPictures");
+
+    container.innerHTML = "";
+
+
+    rememberedImages.forEach(function(name) {
+
+        let img =
+            document.createElement("img");
+
+        img.className = "picture";
+
+        img.src = imagePath(name);
+
+        img.alt = "Memory picture";
+
+        container.appendChild(img);
+
+    });
+
+
+    timerValue = 10;
+
+    document.getElementById("timer").innerText =
+        "10";
+
+
+    timer =
+        setInterval(function() {
+
+            timerValue--;
+
+            document.getElementById("timer").innerText =
+                timerValue;
+
+
+            if (timerValue <= 0) {
+
+                clearInterval(timer);
+
+                startRecall();
+
+            }
+
+        }, 1000);
+
+}
+
+
+/* ==========================================
+   I REMEMBER BUTTON
+   ========================================== */
+
+function startRecall() {
+
+    clearInterval(timer);
+
+    document.getElementById("memoryScreen").style.display =
+        "none";
+
+    document.getElementById("recallScreen").style.display =
+        "block";
+
+
+    document.getElementById("recallRound").innerText =
+        (currentRound + 1) +
+        " / 3";
+
+
+    let wrongPictures =
+        shuffle(
+            imagePool.filter(function(name) {
+
+                return !rememberedImages.includes(name);
+
+            })
+        ).slice(0, 3);
+
+
+    let choices =
+        shuffle(
+            rememberedImages.concat(wrongPictures)
+        );
+
+
+    let container =
+        document.getElementById("choices");
+
+    container.innerHTML = "";
+
+    selectedImages = [];
+
+
+    choices.forEach(function(name) {
+
+        let img =
+            document.createElement("img");
+
+        img.className = "choice";
+
+        img.src = imagePath(name);
+
+        img.alt = "Picture choice";
+
+
+        img.onclick = function() {
+
+            if (selectedImages.includes(name)) {
+
+                selectedImages =
+                    selectedImages.filter(
+                        x => x !== name
+                    );
+
+                img.classList.remove("selected");
+
+            }
+            else {
+
+                selectedImages.push(name);
+
+                img.classList.add("selected");
+
+            }
+
+        };
+
+
+        container.appendChild(img);
+
+    });
+
+}
+
+
+/* ==========================================
+   CHECK ANSWERS
+   ========================================== */
+
+function checkAnswers() {
+
+    let correct = 0;
+
+    rememberedImages.forEach(function(name) {
+
+        if (selectedImages.includes(name)) {
+
+            correct++;
+
+        }
+
+    });
+
+
+    let wrongSelected =
+        selectedImages.filter(function(name) {
+
+            return !rememberedImages.includes(name);
+
+        }).length;
+
+
+    let roundScore =
+        Math.max(0, correct - wrongSelected);
+
+
+    totalCorrect += roundScore;
+
+    totalQuestions += rememberedImages.length;
+
+
+    currentRound++;
+
+
+    if (currentRound < 3) {
+
+        startRound();
+
+    }
+    else {
+
+        showResult();
+
+    }
+
+}
+
+
+/* ==========================================
+   FINAL RESULT
+   ========================================== */
+
+function showResult() {
+
+    document.getElementById("recallScreen").style.display =
+        "none";
+
+    document.getElementById("memoryScreen").style.display =
+        "none";
+
+    document.getElementById("resultScreen").style.display =
+        "block";
+
+
+    let percentage =
+        Math.max(
+            0,
+            Math.round(
+                (totalCorrect / totalQuestions) * 100
+            )
+        );
+
+
+    document.getElementById("score").innerText =
+        percentage + "%";
+
+
+    let t = translations[language] || translations.en;
+
+
+    if (percentage >= 85) {
+
+        document.getElementById("resultText").innerText =
+            t.excellent;
+
+    }
+    else if (percentage >= 60) {
+
+        document.getElementById("resultText").innerText =
+            t.good;
+
+    }
+    else {
+
+        document.getElementById("resultText").innerText =
+            t.keep;
+
+    }
+
+}
+
+
+/* ==========================================
+   RESTART
+   ========================================== */
+
+function restartGame() {
+
+    currentRound = 0;
+
+    totalCorrect = 0;
+
+    totalQuestions = 0;
+
+    rememberedImages = [];
+
+    selectedImages = [];
+
+    startRound();
+
+}
+
+
+/* ==========================================
+   DASHBOARD
+   ========================================== */
+
+function goDashboard() {
+
+    window.location.href = "/dashboard";
+
+}
+
+
+/* ==========================================
+   START
+   ========================================== */
+
+applyLanguage();
+
+startRound();
+
+</script>
+
+</body>
+</html>

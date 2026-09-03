@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MindCare AI - Language</title>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background: white;
+            width: 500px;
+            padding: 45px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .icon {
+            font-size: 55px;
+        }
+
+        h1 {
+            font-size: 34px;
+            color: #2c3e50;
+        }
+
+        p {
+            font-size: 20px;
+            color: #666;
+        }
+
+        .language-button {
+            display: block;
+            width: 100%;
+            padding: 17px;
+            margin: 14px 0;
+            font-size: 21px;
+            border: 2px solid #dfe6e3;
+            border-radius: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .language-button:hover {
+            background: #eef7f3;
+            border-color: #4CAF50;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="card">
+
+    <div class="icon">🌐</div>
+
+    <h1>Choose Your Language</h1>
+
+    <p>Select the language you are most comfortable with.</p>
+
+
+    <!-- ENGLISH -->
+
+    <button class="language-button"
+            onclick="setLanguage('english')">
+        🇬🇧 English
+    </button>
+
+
+    <!-- HINDI -->
+
+    <button class="language-button"
+            onclick="setLanguage('hindi')">
+        🇮🇳 हिंदी
+    </button>
+
+
+    <!-- MARATHI -->
+
+    <button class="language-button"
+            onclick="setLanguage('marathi')">
+        🇮🇳 मराठी
+    </button>
+
+
+    <!-- TELUGU -->
+
+    <button class="language-button"
+            onclick="setLanguage('telugu')">
+        🇮🇳 తెలుగు
+    </button>
+
+
+    <!-- URDU -->
+
+    <button class="language-button"
+            onclick="setLanguage('urdu')">
+        اردو
+    </button>
+
+</div>
+
+
+<script>
+
+function setLanguage(lang) {
+
+    /*
+       Save the language locally too
+       so the browser remembers it.
+    */
+
+    localStorage.setItem(
+        "mindcareLanguage",
+        lang
+    );
+
+
+    /*
+       Send the language to Flask.
+       Flask will save it in the session.
+    */
+
+    window.location.href =
+        "/set-language/" + lang;
+
+}
+
+</script>
+
+
+</body>
+
+</html>
